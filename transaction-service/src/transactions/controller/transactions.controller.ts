@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { TransactionsService } from '../service/transactions.service';
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 
@@ -7,9 +7,12 @@ export class TransactionsController {
   constructor(private readonly service: TransactionsService) {}
 
   @Post()
-  async create(@Body() dto: CreateTransactionDto) {
+  async create(
+    @Body() dto: CreateTransactionDto,
+    @Headers('idempotency-key') key: string,
+  ) {
     console.log('Request to register transaction');
-    const transaction = await this.service.create(dto);
+    const transaction = await this.service.create(dto, key);
 
     return {
       transactionId: transaction.id,
